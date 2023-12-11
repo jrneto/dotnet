@@ -11,6 +11,7 @@ namespace Movies.Api.Controllers
 {
     [ApiController]
     [ApiVersion(1.0)]
+    [ApiVersion(2.0)]
     public class MoviesController : ControllerBase
     {
         private readonly IMovieService _movieService;
@@ -34,51 +35,52 @@ namespace Movies.Api.Controllers
             //return Created($"/{ApiEndpoints.Movies.Create}/{movie.Id}", movie);
         }
 
-        //[ApiVersion(1.0, Deprecated = true)]
-        //[HttpGet(ApiEndpoints.Movies.Get)]
-        //public async Task<IActionResult> GetV1([FromRoute] string idOrSlug,
-        //    [FromServices] LinkGenerator linkGenerator,
-        //    CancellationToken token)
-        //{
-        //    var userId = HttpContext.GetUserId();
+        [MapToApiVersion(1.0)]
+        [HttpGet(ApiEndpoints.Movies.Get)]
+        public async Task<IActionResult> GetV1([FromRoute] string idOrSlug,
+            [FromServices] LinkGenerator linkGenerator,
+            CancellationToken token)
+        {
+            var userId = HttpContext.GetUserId();
 
-        //    var movie = Guid.TryParse(idOrSlug, out var id)
-        //        ? await _movieService.GetByIdAsync(id, userId, token)
-        //        : await _movieService.GetBySlugAsync(idOrSlug, userId, token);
+            var movie = Guid.TryParse(idOrSlug, out var id)
+                ? await _movieService.GetByIdAsync(id, userId, token)
+                : await _movieService.GetBySlugAsync(idOrSlug, userId, token);
 
-        //    if (movie is null)
-        //    {
-        //        return NotFound();
-        //    }
+            if (movie is null)
+            {
+                return NotFound();
+            }
 
-        //    var response = movie.MapToResponse();
+            var response = movie.MapToResponse();
 
-        //    var movieObj = new { id = movie.Id };
+            var movieObj = new { id = movie.Id };
 
-        //    response.Links.Add(new Link
-        //    {
-        //        Href = linkGenerator.GetPathByAction(HttpContext, nameof(GetV1), values: new { idOrSlug = movie.Id }),
-        //        Rel = "self",
-        //        Type = "GET"
-        //    });
+            response.Links.Add(new Link
+            {
+                Href = linkGenerator.GetPathByAction(HttpContext, nameof(GetV1), values: new { idOrSlug = movie.Id }),
+                Rel = "self",
+                Type = "GET"
+            });
 
-        //    response.Links.Add(new Link
-        //    {
-        //        Href = linkGenerator.GetPathByAction(HttpContext, nameof(Update), values: new { id = movie.Id }),
-        //        Rel = "self",
-        //        Type = "PUT"
-        //    });
+            response.Links.Add(new Link
+            {
+                Href = linkGenerator.GetPathByAction(HttpContext, nameof(Update), values: new { id = movie.Id }),
+                Rel = "self",
+                Type = "PUT"
+            });
 
-        //    response.Links.Add(new Link
-        //    {
-        //        Href = linkGenerator.GetPathByAction(HttpContext, nameof(Delete), values: new { id = movie.Id }),
-        //        Rel = "self",
-        //        Type = "DELETE"
-        //    });
+            response.Links.Add(new Link
+            {
+                Href = linkGenerator.GetPathByAction(HttpContext, nameof(Delete), values: new { id = movie.Id }),
+                Rel = "self",
+                Type = "DELETE"
+            });
 
-        //    return Ok(response);
-        //}
+            return Ok(response);
+        }
 
+        [MapToApiVersion(2.0)]
         [HttpGet(ApiEndpoints.Movies.Get)]
         public async Task<IActionResult> GetV2([FromRoute] string idOrSlug,
             [FromServices] LinkGenerator linkGenerator,
