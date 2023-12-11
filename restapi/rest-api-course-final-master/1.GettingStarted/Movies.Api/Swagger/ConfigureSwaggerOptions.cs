@@ -11,7 +11,7 @@ namespace Movies.Api.Swagger
         private readonly IHostEnvironment _environment;
 
         public ConfigureSwaggerOptions(
-            IApiVersionDescriptionProvider provider, 
+            IApiVersionDescriptionProvider provider,
             IHostEnvironment environment)
         {
             _provider = provider;
@@ -29,6 +29,31 @@ namespace Movies.Api.Swagger
                         Title = _environment.ApplicationName,
                         Version = description.ApiVersion.ToString(),
                     });
+
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    In = ParameterLocation.Header,
+                    Description = "Please provide a valid token",
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    BearerFormat = "JWT",
+                    Scheme = "Bearer"
+                });
+
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        Array.Empty<string>()
+                    }
+                });
             }
         }
     }
