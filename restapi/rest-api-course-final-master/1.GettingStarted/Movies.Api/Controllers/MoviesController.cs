@@ -1,6 +1,7 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using Movies.Api.Auth;
 using Movies.Api.Mapping;
 using Movies.Application.Services;
@@ -15,10 +16,14 @@ namespace Movies.Api.Controllers
     public class MoviesController : ControllerBase
     {
         private readonly IMovieService _movieService;
+        private readonly IOutputCacheStore _outputCacheStore;
 
-        public MoviesController(IMovieService movieService)
+        public MoviesController(
+            IMovieService movieService, 
+            IOutputCacheStore outputCacheStore)
         {
             _movieService = movieService;
+            _outputCacheStore = outputCacheStore;
         }
 
         [Authorize(AuthConstants.TrustedMemberPolicyName)]
@@ -32,6 +37,9 @@ namespace Movies.Api.Controllers
             var movie = request.MapToMovie();
 
             await _movieService.CreateAsync(movie, token);
+
+            // invalida o cache quando um novo filme é criado
+            await _outputCacheStore.EvictByTagAsync("movies", token);
 
             return CreatedAtAction(nameof(Create), new { idOrSlug = movie.Id }, movie);
             //return Created($"/{ApiEndpoints.Movies.Create}/{movie.Id}", movie);
@@ -84,7 +92,10 @@ namespace Movies.Api.Controllers
 
         //[MapToApiVersion(2.0)]
         [HttpGet(ApiEndpoints.Movies.Get)]
-        [ResponseCache(Duration = 30, VaryByHeader = "Accept, Accetp-Encoding", Location = ResponseCacheLocation.Any)]
+        // ResponseCahce é cache no cliente
+        //[ResponseCache(Duration = 30, VaryByHeader = "Accept, Accetp-Encoding", Location = ResponseCacheLocation.Any)]
+        // Cache no servidor
+        [OutputCache(PolicyName = "MovieCache")]
         [ProducesResponseType(typeof(MovieResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetV1([FromRoute] string idOrSlug,
@@ -109,7 +120,9 @@ namespace Movies.Api.Controllers
 
         [HttpGet(ApiEndpoints.Movies.GetAll)]
         //este é um cache no cliente. O parametro VaryByQueryKeys configura o cache de acordo com os parametros informados na query
-        [ResponseCache(Duration = 30, VaryByQueryKeys = new[] {"title","year","sortby","page","pageSize"}, Location = ResponseCacheLocation.Any)]
+        //[ResponseCache(Duration = 30, VaryByQueryKeys = new[] {"title","year","sortby","page","pageSize"}, Location = ResponseCacheLocation.Any)]
+        //cache no servidor
+        [OutputCache(PolicyName = "MovieCache")]
         [ProducesResponseType(typeof(MoviesResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll(
             [FromQuery] GetAllMoviesRequest request,
@@ -151,6 +164,9 @@ namespace Movies.Api.Controllers
 
             var response = updatedMovie.MapToResponse();
 
+            // invalida o cache quando um novo filme é atualizado
+            await _outputCacheStore.EvictByTagAsync("movies", token);
+
             return Ok(response);
         }
 
@@ -166,6 +182,9 @@ namespace Movies.Api.Controllers
             {
                 return NotFound();
             }
+
+            // invalida o cache quando um novo filme é deletado
+            await _outputCacheStore.EvictByTagAsync("movies", token);
 
             return Ok();
         }

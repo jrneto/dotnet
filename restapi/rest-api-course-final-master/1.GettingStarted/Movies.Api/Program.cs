@@ -58,7 +58,19 @@ builder.Services.AddApiVersioning(x =>
 .AddMvc()
 .AddApiExplorer();
 
-builder.Services.AddResponseCaching();
+//cache no cliente
+//builder.Services.AddResponseCaching();
+
+//OutputCache no servidor
+builder.Services.AddOutputCache(x =>
+{
+    x.AddBasePolicy(c => c.Cache());
+    x.AddPolicy("MovieCache", c =>
+        c.Cache()
+        .Expire(TimeSpan.FromMinutes(1))
+        .SetVaryByQuery(new[] { "title", "year", "sortby", "page", "pageSize" })
+        .Tag("movies"));
+});
 
 builder.Services.AddControllers();
 
@@ -100,7 +112,13 @@ app.UseAuthorization();
 
 // O cors deve ser usado sempre antes do cache
 //app.UseCors();
-app.UseResponseCaching();
+// cache no cliente
+//app.UseResponseCaching();
+
+//também deve ser configurado depois do CORS
+// Apenas GET e HEAD responses 200 são cacheados.
+// Requisições autenticadas NÃO são cacheadas
+app.UseOutputCache();
 
 app.UseMiddleware<ValidationMappingMiddleware>();
 app.MapControllers();
