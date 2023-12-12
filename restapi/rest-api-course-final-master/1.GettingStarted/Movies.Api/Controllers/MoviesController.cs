@@ -84,6 +84,7 @@ namespace Movies.Api.Controllers
 
         //[MapToApiVersion(2.0)]
         [HttpGet(ApiEndpoints.Movies.Get)]
+        [ResponseCache(Duration = 30, VaryByHeader = "Accept, Accetp-Encoding", Location = ResponseCacheLocation.Any)]
         [ProducesResponseType(typeof(MovieResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetV1([FromRoute] string idOrSlug,
@@ -107,6 +108,8 @@ namespace Movies.Api.Controllers
         }
 
         [HttpGet(ApiEndpoints.Movies.GetAll)]
+        //este é um cache no cliente. O parametro VaryByQueryKeys configura o cache de acordo com os parametros informados na query
+        [ResponseCache(Duration = 30, VaryByQueryKeys = new[] {"title","year","sortby","page","pageSize"}, Location = ResponseCacheLocation.Any)]
         [ProducesResponseType(typeof(MoviesResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll(
             [FromQuery] GetAllMoviesRequest request,

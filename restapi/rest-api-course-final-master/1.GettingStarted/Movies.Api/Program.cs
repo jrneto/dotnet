@@ -58,6 +58,8 @@ builder.Services.AddApiVersioning(x =>
 .AddMvc()
 .AddApiExplorer();
 
+builder.Services.AddResponseCaching();
+
 builder.Services.AddControllers();
 
 builder.Services.AddHealthChecks()
@@ -95,6 +97,10 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// O cors deve ser usado sempre antes do cache
+//app.UseCors();
+app.UseResponseCaching();
 
 app.UseMiddleware<ValidationMappingMiddleware>();
 app.MapControllers();
