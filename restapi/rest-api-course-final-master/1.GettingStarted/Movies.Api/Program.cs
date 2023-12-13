@@ -46,6 +46,8 @@ builder.Services.AddAuthorization(x =>
             c.User.HasClaim(m => m is { Type: AuthConstants.TrustedMemberClaimName, Value: "true" })));
 });
 
+builder.Services.AddScoped<ApiKeyAuthFilter>();
+
 //ASP.NET Versioning documentation: https://github.com/dotnet/aspnet-api-versioning/wiki
 builder.Services.AddApiVersioning(x =>
 {
