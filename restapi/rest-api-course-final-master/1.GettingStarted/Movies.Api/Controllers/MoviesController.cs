@@ -93,6 +93,7 @@ namespace Movies.Api.Controllers
 
         //[MapToApiVersion(2.0)]
         [HttpGet(ApiEndpoints.Movies.Get)]
+        [Authorize(AuthConstants.TrustedMemberPolicyName)]
         // ResponseCahce é cache no cliente
         //[ResponseCache(Duration = 30, VaryByHeader = "Accept, Accetp-Encoding", Location = ResponseCacheLocation.Any)]
         // Cache no servidor
