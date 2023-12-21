@@ -38,6 +38,22 @@ var movie = await moviesApi.GetMovieAsync("6de0d777-06cf-427f-bb42-55f423268e0a"
 
 Console.WriteLine(JsonSerializer.Serialize(movie));
 
+var newMovie = await moviesApi.CreateMovieAsync(new CreateMovieRequest
+{
+    Title = "Spiderman 2",
+    YearOfRelease = 2002,
+    Genres = new[] { "Actions" }
+});
+
+await moviesApi.UpdateMovieAsync(newMovie.Id, new UpdateMovieRequest
+{
+    Title = "Spiderman 2",
+    YearOfRelease = 2002,
+    Genres = new[] { "Actions", "Adventure" }
+});
+
+await moviesApi.DeleteMovieAsync(newMovie.Id);
+
 var request = new GetAllMoviesRequest
 {
     Title = null,
