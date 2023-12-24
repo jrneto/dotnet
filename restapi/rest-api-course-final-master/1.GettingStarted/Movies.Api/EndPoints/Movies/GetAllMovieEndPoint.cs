@@ -2,7 +2,6 @@
 using Movies.Api.Mapping;
 using Movies.Application.Services;
 using Movies.Contracts.Requests;
-using System;
 
 namespace Movies.Api.EndPoints.Movies
 {
