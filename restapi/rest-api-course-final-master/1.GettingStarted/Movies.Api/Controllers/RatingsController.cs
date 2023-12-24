@@ -1,4 +1,4 @@
-﻿using Asp.Versioning;
+﻿/*using Asp.Versioning;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Movies.Api.Auth;
@@ -59,3 +59,4 @@ namespace Movies.Api.Controllers
         }
     }
 }
+*/

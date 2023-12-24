@@ -19,7 +19,8 @@ namespace Movies.Api.EndPoints.Ratings
                 var ratingResponse = ratings.MapToResponse();
                 return TypedResults.Ok(ratingResponse);
             })
-            .WithName(Name);
+            .WithName(Name)
+            .RequireAuthorization();
 
             return app;
         }

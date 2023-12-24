@@ -26,7 +26,8 @@ namespace Movies.Api.EndPoints.Movies
 
                 return Results.Ok();
             })
-            .WithName(Name);
+            .WithName(Name)
+            .RequireAuthorization(AuthConstants.AdminUserPolicyName);
 
             return app;
         }

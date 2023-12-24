@@ -20,7 +20,8 @@ namespace Movies.Api.EndPoints.Ratings
 
                 return result ? Results.Ok() : Results.NotFound();
             })
-            .WithName(Name);
+            .WithName(Name)
+            .RequireAuthorization();
 
             return app;
         }

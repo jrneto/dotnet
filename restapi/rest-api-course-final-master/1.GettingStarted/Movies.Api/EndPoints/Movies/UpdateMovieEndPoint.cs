@@ -34,7 +34,8 @@ namespace Movies.Api.EndPoints.Movies
 
                     return TypedResults.Ok(response);
                 })
-                .WithName(Name);
+                .WithName(Name)
+                .RequireAuthorization(AuthConstants.TrustedMemberPolicyName);
 
             return app;
         }

@@ -61,8 +61,10 @@ builder.Services.AddApiVersioning(x =>
     //x.ApiVersionReader = new HeaderApiVersionReader("api-version");
     x.ApiVersionReader = new MediaTypeApiVersionReader("api-version");
 })
-.AddMvc()
+//.AddMvc()
 .AddApiExplorer();
+
+builder.Services.AddEndpointsApiExplorer();
 
 //cache no cliente
 //builder.Services.AddResponseCaching();
