@@ -4,11 +4,11 @@
     {
         public static IEndpointRouteBuilder MapMovieEndPoints(this IEndpointRouteBuilder app) 
         {
-            //app.MapCreateMovie();
+            app.MapCreateMovie();
             app.MapGetMovie();
-            //app.MapGetAllMovies();
-            //app.MapUpdateMovie();
-            //app.MapDeleteMovie();
+            app.MapGetAllMovies();
+            app.MapUpdateMovie();
+            app.MapDeleteMovie();
 
             return app;
         }

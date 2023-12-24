@@ -42,7 +42,9 @@ namespace Movies.Api.Controllers
             // invalida o cache quando um novo filme é criado
             await _outputCacheStore.EvictByTagAsync("movies", token);
 
-            return CreatedAtAction(nameof(Create), new { idOrSlug = movie.Id }, movie);
+            var response = movie.MapToResponse();
+
+            return CreatedAtAction(nameof(Create), new { idOrSlug = movie.Id }, response);
             //return Created($"/{ApiEndpoints.Movies.Create}/{movie.Id}", movie);
         }
 
@@ -138,9 +140,9 @@ namespace Movies.Api.Controllers
             var movies = await _movieService.GetAllAsync(options, token);
             var movieCount = await _movieService.GetCountAsync(options.Title, options.YearOfRelease, token);
 
-            var moviesResponse = movies.MapToResponse(request.Page, request.PageSize, movieCount);
+            //var moviesResponse = movies.MapToResponse(request.Page, request.PageSize, movieCount);
 
-            return Ok(moviesResponse);
+            return Ok();
         }
 
         [Authorize(AuthConstants.TrustedMemberPolicyName)]
@@ -179,7 +181,6 @@ namespace Movies.Api.Controllers
         public async Task<IActionResult> Delete([FromRoute] Guid id,
             CancellationToken token)
         {
-            var userId = HttpContext.GetUserId();
             var deleted = await _movieService.DeleteByIdAsync(id, token);
             if (!deleted)
             {

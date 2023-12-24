@@ -28,7 +28,8 @@ namespace Movies.Api.EndPoints.Movies
                 var response = movie.MapToResponse();
 
                 return TypedResults.Ok(response);
-            });
+            })
+            .WithName(Name);
 
             return app;
         }
