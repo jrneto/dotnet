@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.AspNetCore.Routing;
 using Movies.Api.Auth;
 using Movies.Api.Mapping;
 using Movies.Application.Services;
 using Movies.Contracts.Requests;
+using Movies.Contracts.Responses;
 
 namespace Movies.Api.EndPoints.Movies
 {
@@ -29,6 +31,8 @@ namespace Movies.Api.EndPoints.Movies
                     return TypedResults.CreatedAtRoute(response, GetMovieEndPoint.Name, new { idOrSlug = movie.Id });
                 })
                 .WithName(Name)
+                .Produces<MovieResponse>(StatusCodes.Status201Created)
+                .Produces<ValidationFailureResponse>(StatusCodes.Status400BadRequest)
                 .RequireAuthorization(AuthConstants.TrustedMemberPolicyName);
 
             return app;
