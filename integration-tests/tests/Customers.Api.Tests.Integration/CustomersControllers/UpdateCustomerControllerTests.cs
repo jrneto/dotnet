@@ -3,13 +3,18 @@ using Customers.Api.Contracts.Requests;
 using Customers.Api.Contracts.Responses;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http.Json;
+using System.Text;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Customers.Api.Tests.Integration.CustomersControllers
 {
-    public class CreateCustomerControllerTests : IClassFixture<CustomerApiFactory>
+    public class UpdateCustomerControllerTests : IClassFixture<CustomerApiFactory>
     {
         private readonly HttpClient _client;
 
@@ -20,40 +25,45 @@ namespace Customers.Api.Tests.Integration.CustomersControllers
             .RuleFor(x => x.DateOfBirth, faker => faker.Person.DateOfBirth.Date);
 
 
-        public CreateCustomerControllerTests(CustomerApiFactory apiFactory)
+        public UpdateCustomerControllerTests(CustomerApiFactory apiFactory)
         {
             _client = apiFactory.CreateClient();
         }
 
 
         [Fact]
-        public async Task Create_CreateUser_WhenDataIsValid()
+        public async Task Update_UpdateUser_WhenDataIsValid()
         {
             // Arrange
             var customer = _customerGenerator.Generate();
+            var createdResponse = await _client.PostAsJsonAsync("customers", customer);
+            var createdCustomer = await createdResponse.Content.ReadFromJsonAsync<CustomerResponse>();
+
+            customer = _customerGenerator.Generate();
 
             //Act
-            var response = await _client.PostAsJsonAsync("customers", customer);
+            var response = await _client.PutAsJsonAsync($"customers/{createdCustomer!.Id}", customer);
 
             //Assert
             var customerResponse = await response.Content.ReadFromJsonAsync<CustomerResponse>();
             customerResponse.Should().BeEquivalentTo(customer);
-            response.StatusCode.Should().Be(HttpStatusCode.Created);
-            response.Headers.Location!.ToString().Should()
-                .Be($"http://localhost/customers/{customerResponse!.Id}");
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
         }
 
         [Fact]
-        public async Task Create_ReturnsValidationError_WhenEmailIsInvalid()
+        public async Task Update_ReturnsValidationError_WhenEmailIsInvalid()
         {
             // Arrange
-            const string invalidEmail = "asdfs3";
+            var customer = _customerGenerator.Generate();
+            var createdResponse = await _client.PostAsJsonAsync("customers", customer);
+            var createdCustomer = await createdResponse.Content.ReadFromJsonAsync<CustomerResponse>();
 
-            var customer = _customerGenerator.Clone()
+            const string invalidEmail = "asdfs3";
+            customer = _customerGenerator.Clone()
                 .RuleFor(x => x.Email, invalidEmail).Generate();
 
             //Act
-            var response = await _client.PostAsJsonAsync("customers", customer);
+            var response = await _client.PutAsJsonAsync($"customers/{createdCustomer!.Id}", customer);
 
             //Assert
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -64,16 +74,19 @@ namespace Customers.Api.Tests.Integration.CustomersControllers
         }
 
         [Fact]
-        public async Task Create_ReturnsValidationError_WhenGitHubUserDoesNotExists()
+        public async Task Update_ReturnsValidationError_WhenGitHubUserDoesNotExists()
         {
             // Arrange
-            const string invalidGitHubUser = "asdfs3";
+            var customer = _customerGenerator.Generate();
+            var createdResponse = await _client.PostAsJsonAsync("customers", customer);
+            var createdCustomer = await createdResponse.Content.ReadFromJsonAsync<CustomerResponse>();
 
-            var customer = _customerGenerator.Clone()
+            const string invalidGitHubUser = "asdfs3";
+            customer = _customerGenerator.Clone()
                 .RuleFor(x => x.GitHubUsername, invalidGitHubUser).Generate();
 
             //Act
-            var response = await _client.PostAsJsonAsync("customers", customer);
+            var response = await _client.PutAsJsonAsync($"customers/{createdCustomer!.Id}", customer);
 
             //Assert
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -81,21 +94,6 @@ namespace Customers.Api.Tests.Integration.CustomersControllers
             error!.Status.Should().Be(400);
             error!.Title.Should().Be("One or more validation errors occurred.");
             error!.Errors["GitHubUsername"][0].Should().Be($"There is no GitHub user with username {invalidGitHubUser}");
-        }
-
-        [Fact]
-        public async Task Create_ReturnsInternalServerError_WhenGithubIsThrottled()
-        {
-            // Arrange
-            var customer = _customerGenerator.Clone()
-                .RuleFor(x => x.GitHubUsername, CustomerApiFactory.ThrottledUser)
-                .Generate();
-
-            //Act
-            var response = await _client.PostAsJsonAsync("customers", customer);
-
-            // Assert
-            response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Customers.Api.Domain;
+using Customers.Api.Domain.Common;
 using Customers.Api.Mapping;
 using Customers.Api.Repositories;
 using FluentValidation;
@@ -72,7 +73,7 @@ public class CustomerService : ICustomerService
     {
         return new []
         {
-            new ValidationFailure(nameof(Customer), message)
+            new ValidationFailure(nameof(GitHubUsername), message)
         };
     }
 }

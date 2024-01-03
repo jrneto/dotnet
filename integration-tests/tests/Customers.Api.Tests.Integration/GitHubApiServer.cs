@@ -26,6 +26,21 @@ namespace Customers.Api.Tests.Integration
                     .WithStatusCode(200));
         }
 
+        public void SetupThrottledUser(string userName)
+        {
+            _server.Given(
+                WireMock.RequestBuilders.Request.Create()
+                .WithPath($"/users/{userName}")
+                .UsingGet())
+                .RespondWith(Response.Create()
+                    .WithBody(@"{
+                        ""message"": ""API rate limit exceeded for 127.0.0.1. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)"",
+                        ""documentation_url"": ""https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting""
+                    }")
+                    .WithHeader("Content-Type", "application/json; charset=utf-8")
+                    .WithStatusCode(403));
+        }
+
         private static string GenereteGitHubUserResponseBody(string userName)
         {
             return $@"{{
