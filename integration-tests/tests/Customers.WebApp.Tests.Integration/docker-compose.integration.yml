@@ -14,6 +14,9 @@ services:
       - ASPNETCORE_Environment=Production
       - CustomersWebApp_Database__ConnectionString=Server=test-db;Port=5432;Database=mydb;User ID=course;Password=changeme;
       - CustomersWebApp_GitHub__ApiBaseUrl=http://localhost:9850
+    depends_on:
+      test-db:
+        condition: service_healthy
 
   test-db:
     image: postgres
